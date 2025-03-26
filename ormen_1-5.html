@@ -3,64 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="ormen.css">
     <title>Snake Game</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #222;
-        }
-        canvas {
-            border: 2px solid white;
-        }
-    </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
+    <canvas id="canvas" width="400" height="400"></canvas>
 
     <script>
-        const canvas = document.getElementById("gameCanvas");
+        const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
-
-        // Game constants
+        const canvasSize = canvas.width;
         const boxSize = 20;
-        const canvasSize = 400;
-        canvas.width = canvasSize;
-        canvas.height = canvasSize;
 
         let snake = [{ x: 200, y: 200 }];
         let direction = "RIGHT";
-        let food = generateFood();
+        let food = foodPlacement();
         let score = 0;
         let gameRunning = true;
 
-        function generateFood() {
+        function foodPlacement(){
             return {
                 x: Math.floor(Math.random() * (canvasSize / boxSize)) * boxSize,
                 y: Math.floor(Math.random() * (canvasSize / boxSize)) * boxSize,
             };
         }
 
-        function draw() {
+        function draw(){
             if (!gameRunning) return;
             
+            //ritar ut vår svarta canvas
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, canvasSize, canvasSize);
 
-            // Draw food
-            ctx.fillStyle = "red";
+            //ritar ut matbitar med slumpmässiga koordinater
+            ctx.fillStyle = "tomato";
             ctx.fillRect(food.x, food.y, boxSize, boxSize);
 
-            // Draw snake
-            ctx.fillStyle = "lime";
+            //ritar ormen
+            ctx.fillStyle = "lightgreen";
             snake.forEach((segment, index) => {
                 ctx.fillRect(segment.x, segment.y, boxSize, boxSize);
             });
 
             moveSnake();
         }
+
 
         function moveSnake() {
             let head = { ...snake[0] };
@@ -72,22 +59,16 @@
                 case "RIGHT": head.x += boxSize; break;
             }
 
-            // Check collision with walls
+            //checka kollision med väggar
             if (head.x < -20 || head.x >= canvasSize + 20 || head.y < -20 || head.y >= canvasSize + 20) {
                 gameOver();
                 return;
             }
 
-            // Check collision with itself
-            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-                gameOver();
-                return;
-            }
-
-            // Check if food is eaten
+            //checkar om den äter upp matbiten
             if (head.x === food.x && head.y === food.y) {
                 score++;
-                food = generateFood();
+                food = foodPlacement();
             } else {
                 snake.pop(); // Remove tail if no food eaten
             }
@@ -104,16 +85,17 @@
         function resetGame() {
             snake = [{ x: 200, y: 200 }];
             direction = "RIGHT";
-            food = generateFood();
+            food = foodPlacement();
             score = 0;
             gameRunning = true;
         }
 
+        //låter spelaren styra ormen
         function changeDirection(event) {
             const key = event.key;
             if (key === "ArrowUp" && direction !== "DOWN" || key === "w" && direction !== "DOWN") direction = "UP";
             if (key === "ArrowDown" && direction !== "UP" || key === "s" && direction !== "UP") direction = "DOWN";
-            if (key === "ArrowLeftx" && direction !== "RIGHT" || key === "a" && direction !== "RIGHT") direction = "LEFT";
+            if (key === "ArrowLeft" && direction !== "RIGHT" || key === "a" && direction !== "RIGHT") direction = "LEFT";
             if (key === "ArrowRight" && direction !== "LEFT" || key === "d" && direction !== "LEFT") direction = "RIGHT";
         }
 
