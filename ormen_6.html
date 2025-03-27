@@ -86,7 +86,6 @@
                         clearInterval(time);
                         time = setInterval(updateCanvas, speed);
                         addBlock()
-
                     }
                 }   
             }
@@ -151,7 +150,8 @@
             snake.draw();
         }
         let food_list = [];
-        function addfoodPlacement() {
+
+        function addFood() {
             if (food_list.length < 1) {
                 let x = Math.floor(Math.random() * (GRID_SIZE)) * BLOCK_SIZE;
                 let y = Math.floor(Math.random() * (GRID_SIZE)) * BLOCK_SIZE;
