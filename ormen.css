@@ -1,9 +1,51 @@
-body{
-  display: flex;
-  padding-inline: 30%;
-  flex-direction: column;
-  justify-content: center;
+*{
+  font-family: "Nunito Sans", sans-serif;
+}
+p, .btn{
+  font-size: medium;
+}
+
+main{
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  background-color: chocolate;
+}
+
+header{
+  grid-column: 1/4;
+  text-align: center;
+  background-color: cyan;
+}
+
+.canvas-container{
+
 }
 #canvas{
-  border: 1px solid black;
+  width: 100%;
+  object-fit: contain;
+}
+
+.game-section, .level-section{
+  display: flex;
+  flex-direction: column;
+  padding: 0 min(40px, 5vw);
+}
+.game-section h2, .level-section h2{
+  text-align: center;
+}
+
+.game-section{
+  background-color: blanchedalmond;
+}
+.level-section{
+  background-color: blueviolet;
+}
+.btn{
+  cursor: pointer;
+  border: 0.15vw solid black;
+  background-color: transparent;
+  padding: min(5px, 5vw);
+}
+.btn:hover{
+  background: rgba(0,0,0,0.1);
 }

@@ -1,106 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="ormen.css">
-    <title>Snake Game</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="ormen.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
+	<title>Snake Game</title>
 </head>
 <body>
-    <canvas id="canvas" width="400" height="400"></canvas>
+	<main>
+		<header>
+			<h1>Snake Game E-nivå</h1>
+		</header>
 
-    <script>
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
-        const canvasSize = canvas.width;
-        const boxSize = 20;
+		<section class="game-section">
+			<h2>Spel</h2>
+			<p>Score: <span id="scoreCounter">0</span></p>
+			<button type="button" id="start" class="btn">start (space)</button>
+		</section>
 
-        let snake = [{ x: 200, y: 200 }];
-        let direction = "RIGHT";
-        let food = foodPlacement();
-        let score = 0;
-        let gameRunning = true;
+		<div class="canvas-container">
+			<canvas id="canvas" width="500px" height="500px"></canvas>
+		</div>
 
-        function foodPlacement(){
-            return {
-                x: Math.floor(Math.random() * (canvasSize / boxSize)) * boxSize,
-                y: Math.floor(Math.random() * (canvasSize / boxSize)) * boxSize,
-            };
-        }
+		<section class="level-section">
+			<h2>Levels</h2>
+		</section>
+	</main>
 
-        function draw(){
-            if (!gameRunning) return;
-            
-            //ritar ut vår svarta canvas
-            ctx.fillStyle = "black";
-            ctx.fillRect(0, 0, canvasSize, canvasSize);
+	<script>
+		const canvas = document.getElementById("canvas");
+		const ctx = canvas.getContext("2d");
+		const scoreCounter = document.getElementById("scoreCounter");
+		const canvasSize = canvas.width;
+		const boxSize = 25;
+		const speed = 100
 
-            //ritar ut matbitar med slumpmässiga koordinater
-            ctx.fillStyle = "tomato";
-            ctx.fillRect(food.x, food.y, boxSize, boxSize);
+    let start = document.getElementById("start");
+    start.addEventListener("click", timer);
+		document.addEventListener("keydown", (event)=>{
+			if (event.key === " ") timer()
+		})
+	
 
-            //ritar ormen
-            ctx.fillStyle = "lightgreen";
-            snake.forEach((segment, index) => {
-                ctx.fillRect(segment.x, segment.y, boxSize, boxSize);
-            });
+		let snake = [{ x: 250, y: 250 }];
+		let direction = "RIGHT";
+		let food = foodPlacement();
+		let score = 0;
+		let gameRunning = false;
 
-            moveSnake();
-        }
+		var heightRatio = 1;
+		canvas.height = canvas.width * heightRatio;
+
+		function foodPlacement(){
+			return {
+				x: Math.floor(Math.random() * (canvasSize / boxSize)) * boxSize,
+				y: Math.floor(Math.random() * (canvasSize / boxSize)) * boxSize,
+			};
+		}
+
+		function draw(){
+			//ritar ut svarta canvas
+			ctx.fillStyle = "black";
+			ctx.fillRect(0, 0, canvasSize, canvasSize);
+
+			//ritar ut matbitar med slumpmässiga koordinater
+			ctx.fillStyle = "tomato";
+			ctx.fillRect(food.x, food.y, boxSize, boxSize);
+
+			//ritar ormen
+			ctx.fillStyle = "lightgreen";
+			snake.forEach((segment, index) => {
+				ctx.fillRect(segment.x, segment.y, boxSize, boxSize);
+			});
+
+			if (!gameRunning) return;
+
+			moveSnake();
+		}
 
 
-        function moveSnake() {
-            let head = { ...snake[0] };
+		function moveSnake(){
+			let head = { ...snake[0] };
 
-            switch (direction) {
-                case "UP": head.y -= boxSize; break;
-                case "DOWN": head.y += boxSize; break;
-                case "LEFT": head.x -= boxSize; break;
-                case "RIGHT": head.x += boxSize; break;
-            }
+			switch (direction) {
+				case "UP": head.y -= boxSize; break;
+				case "DOWN": head.y += boxSize; break;
+				case "LEFT": head.x -= boxSize; break;
+				case "RIGHT": head.x += boxSize; break;
+			}
 
-            //checka kollision med väggar
-            if (head.x < -20 || head.x >= canvasSize + 20 || head.y < -20 || head.y >= canvasSize + 20) {
-                gameOver();
-                return;
-            }
+			//checka kollision med väggar
+			if (head.x < 0 || head.x >= canvasSize || head.y < 0 || head.y >= canvasSize) {
+				gameOver();
+				reset()
+				gameRunning = false;
+				return;
+			}
 
-            //checkar om den äter upp matbiten
-            if (head.x === food.x && head.y === food.y) {
-                score++;
-                food = foodPlacement();
-            } else {
-                snake.pop(); // Remove tail if no food eaten
-            }
+			//checkar om den äter upp matbiten
+			if (head.x === food.x && head.y === food.y){
+				score++;
+				scoreCounter.textContent = score;
+				food = foodPlacement();
+			}
+			else{
+				snake.pop(); // Remove tail if no food eaten
+			}
 
-            snake.unshift(head); // Add new head
-        }
+			snake.unshift(head); // Add new head
+		}
 
-        function gameOver() {
-            gameRunning = false;
-            alert(`Game Over! Your score: ${score}`);
-            resetGame();
-        }
+		let time;
+		function timer() {
+      gameRunning = !gameRunning; 
+      if (gameRunning){
+        document.getElementById("start").textContent = "stop (space)";
+      }
+      else if(!gameRunning){
+        document.getElementById("start").textContent = "start (space)";
+      }
+    }
 
-        function resetGame() {
-            snake = [{ x: 200, y: 200 }];
-            direction = "RIGHT";
-            food = foodPlacement();
-            score = 0;
-            gameRunning = true;
-        }
+		function gameOver() {
+			gameRunning = false;
+		}
 
-        //låter spelaren styra ormen
-        function changeDirection(event) {
-            const key = event.key;
-            if (key === "ArrowUp" && direction !== "DOWN" || key === "w" && direction !== "DOWN") direction = "UP";
-            if (key === "ArrowDown" && direction !== "UP" || key === "s" && direction !== "UP") direction = "DOWN";
-            if (key === "ArrowLeft" && direction !== "RIGHT" || key === "a" && direction !== "RIGHT") direction = "LEFT";
-            if (key === "ArrowRight" && direction !== "LEFT" || key === "d" && direction !== "LEFT") direction = "RIGHT";
-        }
+		function reset() {
+			gameRunning = true
+			snake = [{ x: 250, y: 250 }];
+			direction = "RIGHT";
+			food = foodPlacement();
+			score = 0;
+			scoreCounter.textContent = score;
+			gameRunning = true;
+			document.getElementById("start").textContent = "start (space)";
+		}
 
-        document.addEventListener("keydown", changeDirection);
-        setInterval(draw, 100);
-    </script>
+		//låter spelaren styra ormen
+		function changeDirection(event) {
+			const key = event.key;
+			if (key === "ArrowUp" && direction !== "DOWN" || key === "w" && direction !== "DOWN") direction = "UP";
+			if (key === "ArrowDown" && direction !== "UP" || key === "s" && direction !== "UP") direction = "DOWN";
+			if (key === "ArrowLeft" && direction !== "RIGHT" || key === "a" && direction !== "RIGHT") direction = "LEFT";
+			if (key === "ArrowRight" && direction !== "LEFT" || key === "d" && direction !== "LEFT") direction = "RIGHT";
+		}
+		document.addEventListener("keydown", changeDirection);
+		setInterval(draw, speed);
+	</script>
 </body>
 </html>
