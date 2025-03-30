@@ -29,6 +29,7 @@ header{
   display: flex;
   flex-direction: column;
   padding: 0 min(40px, 5vw);
+  text-align: start;
 }
 .game-section h2, .level-section h2{
   text-align: center;
@@ -48,4 +49,16 @@ header{
 }
 .btn:hover{
   background: rgba(0,0,0,0.1);
+}
+
+.level-list{
+  padding: 0;
+  list-style-type: none;
+}
+.sub-list{
+  padding: 0;
+  list-style-type: none;
+}
+.sub-list li{
+
 }

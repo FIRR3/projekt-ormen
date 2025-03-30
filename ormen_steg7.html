@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="ormen.css">
+		<!-- font -->
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
+	<title>Snake Game</title>
+	<style>
+		body{
+			text-align: center;
+		}
+		canvas{
+			background-color: black;
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<header>
+			<h1>Snake Game C-nivå</h1>
+		</header>
+		<section class="game-section">
+			<h2>Spel</h2>
+			<p>Score: <span id="scoreCounter">0</span></p>
+			<button type="button" id="start" class="btn">Start (space)</button>
+			<button type="button" id="reset" class="btn">Reset (r)</button>
+		</section>
+
+		<div class="canvas-container">
+			<canvas id="my_canvas" width="500" height="500"></canvas>
+		</div>
+
+		<section class="level-section">
+			<h2>Levels</h2>
+			<ul class="level-list">
+				<li>
+					<ul class="sub-list">
+						<li>Speed</li>
+						<li>
+							<input type="radio" name="speed" id="slow" value="slow">
+							<label for="slow">Slow</label>
+						</li>
+						<li>
+							<input type="radio" name="speed" id="medium" value="medium" checked>
+							<label for="medium">Medium</label>
+						</li>
+						<li>
+							<input type="radio" name="speed" id="fast" value="fast">
+							<label for="fast">Fast</label>
+						</li>
+					</ul>
+				</li>
+				<li>
+					<ul class="sub-list">
+						<li>Map</li>
+						<li>
+							<input type="radio" name="map" id="large" value="large" checked>
+							<label for="large">Large</label>
+						</li>
+						<li>
+							<input type="radio" name="map" id="small" value="small">
+							<label for="small">Small</label>
+						</li>
+					</ul>
+				</li>
+				<li>
+					<ul class="sub-list">
+						<li>Walls</li>
+						<li>
+							<input type="radio" name="walls" id="noWallPassTrough" value="noWallPassTrough" checked>
+							<label for="noWallPassTrough">Walls</label>
+						</li>
+						<li>
+							<input type="radio" name="walls" id="wallPassTrough" value="wallPassTrough">
+							<label for="wallPassTrough">No Walls</label>
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</section>
+	</main>
+  <script src="ormen_1-7.js"></script>
+</body>
+</html>

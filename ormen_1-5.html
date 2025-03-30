@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="ormen.css">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<!-- font -->
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
 	<title>Snake Game</title>
@@ -18,7 +19,7 @@
 		<section class="game-section">
 			<h2>Spel</h2>
 			<p>Score: <span id="scoreCounter">0</span></p>
-			<button type="button" id="start" class="btn">start (space)</button>
+			<button type="button" id="start" class="btn">Start (space)</button>
 		</section>
 
 		<div class="canvas-container">
@@ -27,128 +28,41 @@
 
 		<section class="level-section">
 			<h2>Levels</h2>
+			<ul class="level-list">
+				<li>
+					<ul class="sub-list">
+						<li>Speed</li>
+						<li>
+							<input type="radio" name="speed" id="slow" value="slow">
+							<label for="slow">Slow</label>
+						</li>
+						<li>
+							<input type="radio" name="speed" id="medium" value="medium" checked>
+							<label for="medium">Medium</label>
+						</li>
+						<li>
+							<input type="radio" name="speed" id="fast" value="fast">
+							<label for="fast">Fast</label>
+						</li>
+					</ul>
+				</li>
+				<li>
+					<ul class="sub-list">
+						<li>Map</li>
+						<li>
+							<input type="radio" name="map" id="large" value="large" checked>
+							<label for="large">Large</label>
+						</li>
+						<li>
+							<input type="radio" name="map" id="small" value="small">
+							<label for="small">Small</label>
+						</li>
+					</ul>
+				</li>
+			</ul>
 		</section>
 	</main>
 
-	<script>
-		const canvas = document.getElementById("canvas");
-		const ctx = canvas.getContext("2d");
-		const scoreCounter = document.getElementById("scoreCounter");
-		const canvasSize = canvas.width;
-		const boxSize = 25;
-		const speed = 100
-
-    let start = document.getElementById("start");
-    start.addEventListener("click", timer);
-		document.addEventListener("keydown", (event)=>{
-			if (event.key === " ") timer()
-		})
-	
-
-		let snake = [{ x: 250, y: 250 }];
-		let direction = "RIGHT";
-		let food = foodPlacement();
-		let score = 0;
-		let gameRunning = false;
-
-		var heightRatio = 1;
-		canvas.height = canvas.width * heightRatio;
-
-		function foodPlacement(){
-			return {
-				x: Math.floor(Math.random() * (canvasSize / boxSize)) * boxSize,
-				y: Math.floor(Math.random() * (canvasSize / boxSize)) * boxSize,
-			};
-		}
-
-		function draw(){
-			//ritar ut svarta canvas
-			ctx.fillStyle = "black";
-			ctx.fillRect(0, 0, canvasSize, canvasSize);
-
-			//ritar ut matbitar med slumpmässiga koordinater
-			ctx.fillStyle = "tomato";
-			ctx.fillRect(food.x, food.y, boxSize, boxSize);
-
-			//ritar ormen
-			ctx.fillStyle = "lightgreen";
-			snake.forEach((segment, index) => {
-				ctx.fillRect(segment.x, segment.y, boxSize, boxSize);
-			});
-
-			if (!gameRunning) return;
-
-			moveSnake();
-		}
-
-
-		function moveSnake(){
-			let head = { ...snake[0] };
-
-			switch (direction) {
-				case "UP": head.y -= boxSize; break;
-				case "DOWN": head.y += boxSize; break;
-				case "LEFT": head.x -= boxSize; break;
-				case "RIGHT": head.x += boxSize; break;
-			}
-
-			//checka kollision med väggar
-			if (head.x < 0 || head.x >= canvasSize || head.y < 0 || head.y >= canvasSize) {
-				gameOver();
-				reset()
-				gameRunning = false;
-				return;
-			}
-
-			//checkar om den äter upp matbiten
-			if (head.x === food.x && head.y === food.y){
-				score++;
-				scoreCounter.textContent = score;
-				food = foodPlacement();
-			}
-			else{
-				snake.pop(); // Remove tail if no food eaten
-			}
-
-			snake.unshift(head); // Add new head
-		}
-
-		let time;
-		function timer() {
-      gameRunning = !gameRunning; 
-      if (gameRunning){
-        document.getElementById("start").textContent = "stop (space)";
-      }
-      else if(!gameRunning){
-        document.getElementById("start").textContent = "start (space)";
-      }
-    }
-
-		function gameOver() {
-			gameRunning = false;
-		}
-
-		function reset() {
-			gameRunning = true
-			snake = [{ x: 250, y: 250 }];
-			direction = "RIGHT";
-			food = foodPlacement();
-			score = 0;
-			scoreCounter.textContent = score;
-			gameRunning = true;
-			document.getElementById("start").textContent = "start (space)";
-		}
-
-		//låter spelaren styra ormen
-		function changeDirection(event) {
-			const key = event.key;
-			if (key === "ArrowUp" && direction !== "DOWN" || key === "w" && direction !== "DOWN") direction = "UP";
-			if (key === "ArrowDown" && direction !== "UP" || key === "s" && direction !== "UP") direction = "DOWN";
-			if (key === "ArrowLeft" && direction !== "RIGHT" || key === "a" && direction !== "RIGHT") direction = "LEFT";
-			if (key === "ArrowRight" && direction !== "LEFT" || key === "d" && direction !== "LEFT") direction = "RIGHT";
-		}
-		document.addEventListener("keydown", changeDirection);
-		setInterval(draw, speed);
-	</script>
+	<script src="ormen_1-5.js"></script>
 </body>
 </html>
