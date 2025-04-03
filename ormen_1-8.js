@@ -10,9 +10,9 @@ let ctx = canvas.getContext("2d");
 
 let playing = false;
 let speed = 100;
-let scoreCounter = 0;
+let score = 0;
 
-let boxSize = 10;
+let boxSize = 25;
 let gridSize = canvas.width / boxSize;
 
 //responsiv canvas
@@ -34,20 +34,20 @@ class Snake{
     this.body.unshift(head);
     this.body.pop();
     if (wallPassTrough.checked){
-      if (head.x >= gridSize) head.x = 0
-      if (head.x < 0) head.x = gridSize - 1
-      if (head.y >= gridSize) head.y = 0
-      if (head.y < 0) head.y = gridSize - 1 
+      if (head.x >= gridSize) head.x = 0;
+      if (head.x < 0) head.x = gridSize - 1;
+      if (head.y >= gridSize) head.y = 0;
+      if (head.y < 0) head.y = gridSize - 1;
     }
     else{
       if (head.x >= gridSize || head.x < 0 || head.y >= gridSize || head.y < 0){
-        reset();
+        reset()
       }
     }
     
     for (let i = 1; i < snake.body.length; i++){
       if (head.x === snake.body[i].x && head.y === snake.body[i].y){
-        reset();
+        reset()
       }
     }
     for ( let i = 0; i < block_list.length; i++){
@@ -74,10 +74,9 @@ class Snake{
       this.direction.y === -newDirection.y) return;
     this.direction = newDirection;
   }
+
   reset(){
     this.body = [{x: 10, y: 10},{x: 9, y: 10},{x: 8, y: 10}];
-    this.direction ={x: 1, y: 0};
-    scoreCounter = 0;
   }
   
   eat(){
@@ -86,9 +85,9 @@ class Snake{
       for (let i = 0; i < foodList.length; i++){
         if (this.body[0].x == foodList[i].x / boxSize && this.body[0].y == foodList[i].y / boxSize){
           this.body.push(this.body[this.body.length - 1]);
-          scoreCounter += 1;
+          score += 1;
           foodList.pop()
-          if (scoreCounter % 3 == 0){
+          if (score % 3 == 0){
             speed *= 0.9;
             clearInterval(time);
             time = setInterval(updateCanvas, speed);
@@ -134,35 +133,34 @@ function inputHandler(event){
   }
 }
 
+//checkar levels och uppdateras varje gång en input clickas
+function levelCheck(){
+  var checked_speed = document.querySelector('input[name = "speed"]:checked');
+  var checked_map = document.querySelector('input[name = "map"]:checked');		
 
-  //checkar levels och uppdateras varje gång en input clickas
-  function levelCheck(){
-    var checked_speed = document.querySelector('input[name = "speed"]:checked');
-    var checked_map = document.querySelector('input[name = "map"]:checked');		
+  if(checked_speed.value == "slow") speed = 200;
+  else if (checked_speed.value == "medium") speed = 100;
+  else if (checked_speed.value == "fast") speed = 50;
 
-    if(checked_speed.value == "slow") speed = 200;
-    else if (checked_speed.value == "medium") speed = 100;
-    else if (checked_speed.value == "fast") speed = 50;
-
-    if(checked_map.value == "large"){
-      boxSize = 10;
-      gridSize = canvas.width / boxSize;
-    }
-    else if (checked_map.value == "small"){
-      boxSize = 25;
-      gridSize = canvas.width / boxSize;
-    } 
-    
-    clearInterval(time)
-    time = setInterval(reset, speed);
+  if(checked_map.value == "large"){
+    boxSize = 10;
+    gridSize = canvas.width / boxSize;
   }
-  var inputs = document.querySelectorAll(".level-list input");
-  check = function() {
-    levelCheck();
-  };
-  [].map.call(inputs, function(elem) {
-    elem.addEventListener("click", check, false);
-  });
+  else if (checked_map.value == "small"){
+    boxSize = 25;
+    gridSize = canvas.width / boxSize;
+  } 
+  
+  clearInterval(time)
+  time = setInterval(reset, speed);
+}
+var inputs = document.querySelectorAll(".level-list input");
+check = function() {
+  levelCheck();
+};
+[].map.call(inputs, function(elem) {
+  elem.addEventListener("click", check, false);
+});
 
 function updateCanvas(){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -171,7 +169,7 @@ function updateCanvas(){
   snake.eat();
   food()
   block()
-  document.getElementById("scoreCounter").innerText = scoreCounter;
+  document.getElementById("scoreCounter").innerText = score;
 }
 let time;
 let food_time;
@@ -189,8 +187,29 @@ function timer(){
     document.getElementById("start").textContent = "Start (space)";
   }
 }
+
+//highscore
+const scoreListContainer = document.getElementById("scoreListContainer");
+var scoreCounters = scoreListContainer.getElementsByClassName("scoreCount");
+
+let highScoreList = []
+function updateScore(x){
+  highScoreList.push(x)
+  highScoreList.sort()
+  highScoreList.reverse()
+
+  if (highScoreList.length > 5) highScoreList.pop(-1)
+
+  for (i = 0; i < highScoreList.length; i++){
+    scoreCounters[i].innerHTML = highScoreList[i];
+    if(scoreCounters[i].classList.contains("active") == false) scoreCounters[i].classList.add("active")
+  }
+}
+
 function reset(){
+  updateScore(score)
   snake.reset();
+  score = 0;
   playing = true;
   timer()
   foodList = [];
@@ -201,21 +220,29 @@ function reset(){
     addBlock()
   }
 }
+
 let foodList = [];
 function addFood(){
   if (foodList.length < 1){
     let x = Math.floor(Math.random() * (gridSize)) * boxSize;
     let y = Math.floor(Math.random() * (gridSize)) * boxSize;
+
+
+
     let food_place = true;
     for (let i = 0; i < snake.body.length; i++){
       if (x == snake.body[i].x && y == snake.body[i].y){
         for (let i = 0; i < foodList.length; i++){
           if (x == foodList[i].x && y == foodList[i].y){
-            food_place = false
+            food_place = false;
           }
         }
       }
-    }   
+    }
+
+    console.log(x, y)
+    console.log(addBlock.x)
+
     if (food_place) foodList.push({x,y}) 
   }
 }
@@ -231,14 +258,15 @@ function addBlock(){
   if (block_list.length < 10){
     let x = Math.floor(Math.random() * (gridSize)) * boxSize;
     let y = Math.floor(Math.random() * (gridSize)) * boxSize;
-    let block_place = true
+    let block_place = true;
     for (let i = 0; i < snake.body.length; i++){
       if (x == snake.body[i].x && y == snake.body[i].y){
         for (let i = 0; i < block_list.length; i++){
-          if (x == block_list[i].x && y == block_list[i].y) block_place = false
+          if (x == block_list[i].x && y == block_list[i].y) block_place = false;
         }
       }
-    }   
+    }
+    console.log("block x: " + x, "block y: " + y)
     if (block_list)block_list.push({x,y})
   }
 }

@@ -17,12 +17,10 @@ header{
   background-color: cyan;
 }
 
-.canvas-container{
-
-}
 #canvas{
   width: 100%;
   object-fit: contain;
+  background-color: black;
 }
 
 .game-section, .level-section{
@@ -31,16 +29,22 @@ header{
   padding: 0 min(40px, 5vw);
   text-align: start;
 }
+
 .game-section h2, .level-section h2{
   text-align: center;
 }
-
 .game-section{
   background-color: blanchedalmond;
 }
+
 .level-section{
   background-color: blueviolet;
 }
+.level-list{
+  padding: 0;
+  list-style-type: none;
+}
+
 .btn{
   cursor: pointer;
   border: 0.15vw solid black;
@@ -51,14 +55,14 @@ header{
   background: rgba(0,0,0,0.1);
 }
 
-.level-list{
-  padding: 0;
-  list-style-type: none;
-}
 .sub-list{
   padding: 0;
   list-style-type: none;
 }
-.sub-list li{
 
+#scoreListContainer span{
+  display: none;
+}
+#scoreListContainer .active{
+  display: inline-block;
 }
