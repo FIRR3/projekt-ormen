@@ -3,7 +3,7 @@ let start = document.getElementById("start");
 let reset_game = document.getElementById("reset");
 start.addEventListener("click", timer);
 reset_game.addEventListener("click", reset);
-let wallPassTrough = document.getElementById("wallPassTrough");
+let borderPassTrough = document.getElementById("borderPassTrough");
 
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
@@ -33,7 +33,7 @@ class Snake{
 
     this.body.unshift(head);
     this.body.pop();
-    if (wallPassTrough.checked){
+    if (borderPassTrough.checked){
       if (head.x >= gridSize) head.x = 0
       if (head.x < 0) head.x = gridSize - 1
       if (head.y >= gridSize) head.y = 0

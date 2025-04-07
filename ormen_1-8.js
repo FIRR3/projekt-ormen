@@ -3,7 +3,7 @@ let start = document.getElementById("start");
 let reset_game = document.getElementById("reset");
 start.addEventListener("click", timer);
 reset_game.addEventListener("click", reset);
-let wallPassTrough = document.getElementById("wallPassTrough");
+let borderPassTrough = document.getElementById("borderPassTrough");
 
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
@@ -33,7 +33,7 @@ class Snake{
 
     this.body.unshift(head);
     this.body.pop();
-    if (wallPassTrough.checked){
+    if (borderPassTrough.checked){
       if (head.x >= gridSize) head.x = 0;
       if (head.x < 0) head.x = gridSize - 1;
       if (head.y >= gridSize) head.y = 0;
@@ -50,8 +50,8 @@ class Snake{
         reset()
       }
     }
-    for ( let i = 0; i < block_list.length; i++){
-      if (head.x === block_list[i].x / boxSize && head.y === block_list[i].y / boxSize){
+    for ( let i = 0; i < blockList.length; i++){
+      if (head.x === blockList[i].x / boxSize && head.y === blockList[i].y / boxSize){
         reset()
       }
     }
@@ -138,10 +138,12 @@ function levelCheck(){
   var checked_speed = document.querySelector('input[name = "speed"]:checked');
   var checked_map = document.querySelector('input[name = "map"]:checked');		
 
+  //slow, medium & fast speed
   if(checked_speed.value == "slow") speed = 200;
   else if (checked_speed.value == "medium") speed = 100;
   else if (checked_speed.value == "fast") speed = 50;
 
+  //large & small map
   if(checked_map.value == "large"){
     boxSize = 10;
     gridSize = canvas.width / boxSize;
@@ -172,18 +174,18 @@ function updateCanvas(){
   document.getElementById("scoreCounter").innerText = score;
 }
 let time;
-let food_time;
+let foodTime;
       
 function timer(){
   playing = !playing; 
   if (playing){
     time = setInterval(updateCanvas, speed);
-    food_time = setInterval(addFood, 2000);
+    foodTime = setInterval(addFood, 2000);
     document.getElementById("start").textContent = "Stop (space)";
   } 
   else if(!playing){
     clearInterval(time);
-    clearInterval(food_time);
+    clearInterval(foodTime);
     document.getElementById("start").textContent = "Start (space)";
   }
 }
@@ -213,7 +215,7 @@ function reset(){
   playing = true;
   timer()
   foodList = [];
-  block_list = [];
+  blockList = [];
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   snake.draw();
   for (i = 0; i < 10; i++){
@@ -224,26 +226,29 @@ function reset(){
 let foodList = [];
 function addFood(){
   if (foodList.length < 1){
+    //bestämmer en slumpmässig position för matbiten
     let x = Math.floor(Math.random() * (gridSize)) * boxSize;
     let y = Math.floor(Math.random() * (gridSize)) * boxSize;
-
-
-
-    let food_place = true;
+    let foodPlace = true;
+    //om maten rör ormen kommer maten att käkas upp
     for (let i = 0; i < snake.body.length; i++){
       if (x == snake.body[i].x && y == snake.body[i].y){
         for (let i = 0; i < foodList.length; i++){
           if (x == foodList[i].x && y == foodList[i].y){
-            food_place = false;
+            foodPlace = false;
           }
         }
       }
     }
-
-    console.log(x, y)
-    console.log(addBlock.x)
-
-    if (food_place) foodList.push({x,y}) 
+    //om en matbit ska spawnas på ett block kommer den raderas och en ny kommer att skapas
+    for(i = 0; i < blockList.length; i++){
+      if(blockList[i].x == x && blockList[i].y == y){
+        foodPlace = false;
+        foodList = [];
+        addFood()
+      }
+    }
+    if (foodPlace) foodList.push({x,y}) 
   }
 }
 function food(){
@@ -253,27 +258,28 @@ function food(){
   }
 }
 
-let block_list = [];
+let occupiedSquares = []; //
+let blockList = [];
+
 function addBlock(){
-  if (block_list.length < 10){
+  if (blockList.length < 10){
     let x = Math.floor(Math.random() * (gridSize)) * boxSize;
     let y = Math.floor(Math.random() * (gridSize)) * boxSize;
-    let block_place = true;
+    let blockPlace = true;
     for (let i = 0; i < snake.body.length; i++){
       if (x == snake.body[i].x && y == snake.body[i].y){
-        for (let i = 0; i < block_list.length; i++){
-          if (x == block_list[i].x && y == block_list[i].y) block_place = false;
+        for (let i = 0; i < blockList.length; i++){
+          if (x == blockList[i].x && y == blockList[i].y) blockPlace = false;
         }
       }
     }
-    console.log("block x: " + x, "block y: " + y)
-    if (block_list)block_list.push({x,y})
+    if (blockList)blockList.push({x,y})
   }
 }
 function block(){
-  for (let i = 0; i < block_list.length; i++){
+  for (let i = 0; i < blockList.length; i++){
     ctx.fillStyle = "blue";
-    ctx.fillRect(block_list[i].x, block_list[i].y, boxSize, boxSize);
+    ctx.fillRect(blockList[i].x, blockList[i].y, boxSize, boxSize);
   }
 }
 for (i = 0; i < 10; i++){
