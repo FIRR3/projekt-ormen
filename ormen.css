@@ -25,6 +25,7 @@ header{
   width: 80%;
   object-fit: contain;
   background-color: black;
+  border: 3px solid blue;
 }
 
 .game-section, .level-section{

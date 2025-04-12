@@ -20,7 +20,7 @@
 			<button type="button" id="start" class="btn">Start (space)</button>
 			<button type="button" id="reset" class="btn">Reset (r)</button>
       <div>
-        <h3>Highscore</h3>
+        <h3>Highscore:</h3>
         <ul id="scoreListContainer" class="sub-list">
           <li>1. <span id="score1" class="scoreCount">#</span></li>
           <li>2. <span id="score2" class="scoreCount">#</span></li>
@@ -29,6 +29,10 @@
           <li>5. <span id="score5" class="scoreCount">#</span></li>
         </ul>
       </div>
+			<div class="food-timer-container">
+				<h3>Food timer:</h3>
+				<span id="foodTimerDisplay">10</span>
+			</div>
 		</section>
 
 		<div class="canvas-container">
@@ -72,15 +76,32 @@
 					<ul class="sub-list">
 						<li>Borders</li>
 						<li>
-							<input type="radio" name="borders" id="noBorderPassTrough" value="noBorderPassTrough" checked>
-							<label for="noBorderPassTrough">Borders</label>
+							<input type="radio" name="borders" id="noBorderPassThrough" value="noBorderPassThrough" checked>
+							<label for="noBorderPassThrough">Borders</label>
 						</li>
 						<li>
-							<input type="radio" name="borders" id="borderPassTrough" value="borderPassTrough">
-							<label for="borderPassTrough">No Borders</label>
+							<input type="radio" name="borders" id="borderPassThrough" value="borderPassThrough">
+							<label for="borderPassThrough">No Borders</label>
 						</li>
 					</ul>
 				</li>
+				<li>
+					<ul class="sub-list">
+						<li>Blocks</li>
+						<li>
+							<input type="radio" name="blocks" id="noBlocks" value="noBlocks" checked>
+							<label for="noBlocks">No blocks</label>
+						</li>
+						<li>
+							<input type="radio" name="blocks" id="haveBlocks" value="haveBlocks">
+							<label for="haveBlocks">Blocks</label>
+						</li>
+						<li>
+							<input type="radio" name="blocks" id="movingBlocks" value="movingBlocks">
+							<label for="movingBlocks">Blocks😈</label>
+						</li>
+					</ul>
+				</li>				
 			</ul>
 		</section>
 	</main>
