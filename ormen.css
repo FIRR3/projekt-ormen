@@ -17,8 +17,12 @@ header{
   background-color: cyan;
 }
 
+.canvas-container{
+  display: flex;
+  justify-content: center;
+}
 #canvas{
-  width: 100%;
+  width: 80%;
   object-fit: contain;
   background-color: black;
 }

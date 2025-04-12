@@ -107,21 +107,25 @@ function inputHandler(event){
     case "w":
     case "W":
       snake.changeDirection({x: 0, y: -1});
+      event.preventDefault()
       break;
     case "ArrowDown":
     case "s":
     case "S":
       snake.changeDirection({x: 0, y: 1});
+      event.preventDefault()
       break;
     case "ArrowLeft":
     case "a":
     case "A":
       snake.changeDirection({x: -1, y: 0});
+      event.preventDefault()
       break;
     case "ArrowRight":
     case "d":
     case "D":
       snake.changeDirection({x: 1, y: 0});
+      event.preventDefault()
       break;
     case " ":
       timer()
