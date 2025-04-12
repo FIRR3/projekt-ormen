@@ -3,21 +3,30 @@ let start = document.getElementById("start");
 let reset_game = document.getElementById("reset");
 start.addEventListener("click", timer);
 reset_game.addEventListener("click", reset);
-let borderPassTrough = document.getElementById("borderPassTrough");
 
+//canvas
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
+var heightRatio = 1; //responsiv canvas
+canvas.height = canvas.width * heightRatio; //responsiv canvas
 
+//highscore
+const scoreListContainer = document.getElementById("scoreListContainer");
+var scoreCounters = scoreListContainer.getElementsByClassName("scoreCount");
+//blocks
+let enableBlocks = false; //används för om vi ska spawna blocks eller inte
+let movingBlocks = document.getElementById("movingBlocks");
+//variabel för att det ska finnas borders eller inte
+let enableBorders = true;
+//variabel för om spelet körs 
 let playing = false;
+
+//game settings
 let speed = 100;
 let score = 0;
-
 let boxSize = 25;
 let gridSize = canvas.width / boxSize;
 
-//responsiv canvas
-var heightRatio = 1;
-canvas.height = canvas.width * heightRatio;
 
 class Snake{
   constructor(){
@@ -33,7 +42,7 @@ class Snake{
 
     this.body.unshift(head);
     this.body.pop();
-    if (borderPassTrough.checked){
+    if (enableBorders == false){
       if (head.x >= gridSize) head.x = 0;
       if (head.x < 0) head.x = gridSize - 1;
       if (head.y >= gridSize) head.y = 0;
@@ -141,7 +150,9 @@ function inputHandler(event){
 //checkar levels och uppdateras varje gång en input clickas
 function levelCheck(){
   var checked_speed = document.querySelector('input[name = "speed"]:checked');
-  var checked_map = document.querySelector('input[name = "map"]:checked');		
+  var checked_map = document.querySelector('input[name = "map"]:checked');
+  var checked_borders = document.querySelector('input[name = "borders"]:checked')
+  var checked_blocks = document.querySelector('input[name = "blocks"]:checked')		
 
   //slow, medium & fast speed
   if(checked_speed.value == "slow") speed = 200;
@@ -158,6 +169,14 @@ function levelCheck(){
     gridSize = canvas.width / boxSize;
   } 
   
+  //borders
+  if(checked_borders.value == "noBorderPassThrough") enableBorders = true;
+  else if(checked_borders.value == "borderPassThrough") enableBorders = false;
+
+  //blocks
+  if(checked_blocks.value == "noBlocks") enableBlocks = false;
+  else if(checked_blocks.value == "haveBlocks" || "movingBlocks") enableBlocks = true;
+
   clearInterval(time)
   time = setInterval(reset, speed);
 }
@@ -175,6 +194,9 @@ function updateCanvas(){
   snake.draw();
   snake.eat();
   food()
+  if (movingBlocks.checked) {
+    moveBlocksTowardSnake();
+  }
   block()
   document.getElementById("scoreCounter").innerText = score;
 }
@@ -195,15 +217,10 @@ function timer(){
   }
 }
 
-//highscore
-const scoreListContainer = document.getElementById("scoreListContainer");
-var scoreCounters = scoreListContainer.getElementsByClassName("scoreCount");
-
 let highScoreList = []
 function updateScore(x){
   highScoreList.push(x)
-  highScoreList.sort()
-  highScoreList.reverse()
+  highScoreList.sort(function(a, b){return b-a});
 
   if (highScoreList.length > 5) highScoreList.pop(-1)
 
@@ -268,27 +285,123 @@ let occupiedSquares = []; //
 let blockList = [];
 
 function addBlock(){
-  if (blockList.length < 10){
-    let x = Math.floor(Math.random() * (gridSize)) * boxSize;
-    let y = Math.floor(Math.random() * (gridSize)) * boxSize;
-    let blockPlace = true;
-    for (let i = 0; i < snake.body.length; i++){
-      if (x == snake.body[i].x && y == snake.body[i].y){
-        for (let i = 0; i < blockList.length; i++){
-          if (x == blockList[i].x && y == blockList[i].y) blockPlace = false;
+  if (enableBlocks == true){
+    if (blockList.length < 10){
+      let x = Math.floor(Math.random() * (gridSize)) * boxSize;
+      let y = Math.floor(Math.random() * (gridSize)) * boxSize;
+      let blockPlace = true;
+      for (let i = 0; i < snake.body.length; i++){
+        if (x == snake.body[i].x && y == snake.body[i].y){
+          for (let i = 0; i < blockList.length; i++){
+            if (x == blockList[i].x && y == blockList[i].y) blockPlace = false;
+          }
         }
       }
+      if (blockList)blockList.push({x,y})
     }
-    if (blockList)blockList.push({x,y})
   }
+  else return;
 }
 function block(){
-  for (let i = 0; i < blockList.length; i++){
-    ctx.fillStyle = "blue";
-    ctx.fillRect(blockList[i].x, blockList[i].y, boxSize, boxSize);
+  if (enableBlocks == true){
+    for (let i = 0; i < blockList.length; i++){
+      ctx.fillStyle = "blue";
+      ctx.fillRect(blockList[i].x, blockList[i].y, boxSize, boxSize);
+    }
+  }
+  else return;
+}
+
+function bfs(startX, startY, targetX, targetY){
+  let queue = [[startX, startY]];
+  let visited = new Set();
+  let cameFrom = {};
+  visited.add(`${startX},${startY}`);
+
+  const directions = [
+    [0, -1], // up
+    [0, 1],  // down
+    [-1, 0], // left
+    [1, 0],  // right
+  ];
+
+  while (queue.length > 0) {
+    let [x, y] = queue.shift();
+
+    if (x === targetX && y === targetY) {
+      // Reconstruct path
+      let path = [];
+      while (`${x},${y}` !== `${startX},${startY}`) {
+        path.unshift([x, y]);
+        [x, y] = cameFrom[`${x},${y}`];
+      }
+      return path;
+    }
+
+    for (let [dx, dy] of directions) {
+      let nx = x + dx;
+      let ny = y + dy;
+      let key = `${nx},${ny}`;
+
+      if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize &&!visited.has(key) &&isCellFree(nx, ny))visited.add;
+    }
   }
 }
-for (i = 0; i < 10; i++){
-  addBlock()
+
+let blockMoveCounter = 0;
+const blockMoveInterval = 1; // move every x updateCanvas() calls
+
+function moveBlocksTowardSnake() {
+  blockMoveCounter++;
+  if (blockMoveCounter < blockMoveInterval) return;
+  blockMoveCounter = 0;
+
+  const head = snake.body[0];
+
+  for (let block of blockList) {
+    // Initialize individual cooldown if it doesn't exist
+    if (block.moveCooldown === undefined) {
+      block.moveCooldown = Math.floor(Math.random() * 5) + 3;
+    }
+
+    // Decrease cooldown and skip if not ready
+    block.moveCooldown--;
+    if (block.moveCooldown > 0) continue;
+
+    // Reset cooldown randomly (controls how slow each block moves)
+    block.moveCooldown = 4 + Math.floor(Math.random() * 5);
+
+    // Calculate direction toward snake's head
+    const dx = head.x - block.x / boxSize;
+    const dy = head.y - block.y / boxSize;
+
+    // Determine the next position in pixels
+    let nextX = block.x;
+    let nextY = block.y;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      nextX += Math.sign(dx) * boxSize;
+    } else {
+      nextY += Math.sign(dy) * boxSize;
+    }
+
+    // Check collision with snake's body
+    let collisionWithSnake = snake.body.some(segment => {
+      return nextX === segment.x * boxSize && nextY === segment.y * boxSize;
+    });
+
+    // Check collision with other blocks
+    let collisionWithBlock = blockList.some(otherBlock => {
+      // Make sure we don't compare the block with itself
+      if (otherBlock === block) return false;
+      return nextX === otherBlock.x && nextY === otherBlock.y;
+    });
+
+    // Only move if both collisions are avoided
+    if (!collisionWithSnake && !collisionWithBlock) {
+      block.x = nextX;
+      block.y = nextY;
+    }
+  }
 }
+
 levelCheck()

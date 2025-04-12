@@ -13,17 +13,17 @@ canvas.height = canvas.width * heightRatio; //responsiv canvas
 //highscore
 const scoreListContainer = document.getElementById("scoreListContainer");
 var scoreCounters = scoreListContainer.getElementsByClassName("scoreCount");
-
+//blocks
 let enableBlocks = false; //används för om vi ska spawna blocks eller inte
 let movingBlocks = document.getElementById("movingBlocks");
-
 //variabel för att det ska finnas borders eller inte
 let enableBorders = true;
-
+//variabel för om spelet körs 
 let playing = false;
+
+//game settings
 let speed = 100;
 let score = 0;
-
 let boxSize = 25;
 let gridSize = canvas.width / boxSize;
 
@@ -181,10 +181,10 @@ function levelCheck(){
   time = setInterval(reset, speed);
 }
 var inputs = document.querySelectorAll(".level-list input");
-check = function() {
+check = function(){
   levelCheck();
 };
-[].map.call(inputs, function(elem) {
+[].map.call(inputs, function(elem){
   elem.addEventListener("click", check, false);
 });
 
@@ -200,9 +200,9 @@ function updateCanvas(){
   block()
   document.getElementById("scoreCounter").innerText = score;
 }
+
 let time;
-let foodTime;
-      
+let foodTime;   
 function timer(){
   playing = !playing; 
   if (playing){
@@ -281,9 +281,7 @@ function food(){
   }
 }
 
-let occupiedSquares = []; //
 let blockList = [];
-
 function addBlock(){
   if (enableBlocks == true){
     if (blockList.length < 10){
@@ -312,7 +310,7 @@ function block(){
   else return;
 }
 
-function bfs(startX, startY, targetX, targetY){
+function seeking(startX, startY, targetX, targetY){
   let queue = [[startX, startY]];
   let visited = new Set();
   let cameFrom = {};
@@ -351,7 +349,7 @@ function bfs(startX, startY, targetX, targetY){
 let blockMoveCounter = 0;
 const blockMoveInterval = 1; // move every x updateCanvas() calls
 
-function moveBlocksTowardSnake() {
+function moveBlocksTowardSnake(){
   blockMoveCounter++;
   if (blockMoveCounter < blockMoveInterval) return;
   blockMoveCounter = 0;
