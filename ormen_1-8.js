@@ -4,6 +4,13 @@ let reset_game = document.getElementById("reset");
 start.addEventListener("click", timer);
 reset_game.addEventListener("click", reset);
 
+//food timer
+const foodTimerDisplay = document.getElementById("foodTimerDisplay");
+const foodTimerBar = document.getElementById("foodTimerBar");
+const foodTimerContainer = document.getElementById("foodTimerContainer");
+let displayedFoodCount = 10;
+let foodTimerEnabled;
+
 //canvas
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
@@ -96,6 +103,7 @@ class Snake{
         if (this.body[0].x == foodList[i].x / boxSize && this.body[0].y == foodList[i].y / boxSize){
           this.body.push(this.body[this.body.length - 1]);
           score += 1;
+          resetFoodTimer()
           foodList.pop()
           if (score % 3 == 0){
             speed *= 0.9;
@@ -152,7 +160,8 @@ function levelCheck(){
   var checked_speed = document.querySelector('input[name = "speed"]:checked');
   var checked_map = document.querySelector('input[name = "map"]:checked');
   var checked_borders = document.querySelector('input[name = "borders"]:checked')
-  var checked_blocks = document.querySelector('input[name = "blocks"]:checked')		
+  var checked_blocks = document.querySelector('input[name = "blocks"]:checked')
+  var checked_foodTimer = document.querySelector('input[name = "foodTimer"]:checked')	
 
   //slow, medium & fast speed
   if(checked_speed.value == "slow") speed = 200;
@@ -170,12 +179,28 @@ function levelCheck(){
   } 
   
   //borders
-  if(checked_borders.value == "noBorderPassThrough") enableBorders = true;
-  else if(checked_borders.value == "borderPassThrough") enableBorders = false;
+  if(checked_borders.value == "noBorderPassThrough"){
+    enableBorders = true;
+    canvas.style.border = "3px solid blue"
+  }
+  else if(checked_borders.value == "borderPassThrough"){
+    enableBorders = false;
+    canvas.style.border = "3px solid chocolate"
+  }
 
   //blocks
   if(checked_blocks.value == "noBlocks") enableBlocks = false;
   else if(checked_blocks.value == "haveBlocks" || "movingBlocks") enableBlocks = true;
+
+  //food timer
+  if(checked_foodTimer.value == "foodTimerDisable"){
+    foodTimerEnabled = false;
+    foodTimerContainer.style.display = "none";
+  }
+  if(checked_foodTimer.value == "foodTimerEnable"){
+    foodTimerEnabled = true;
+    foodTimerContainer.style.display = "block";
+  }
 
   clearInterval(time)
   time = setInterval(reset, speed);
@@ -208,11 +233,13 @@ function timer(){
   if (playing){
     time = setInterval(updateCanvas, speed);
     foodTime = setInterval(addFood, 2000);
+    if(foodTimerEnabled == true) startFoodTimer()
     document.getElementById("start").textContent = "Stop (space)";
   } 
   else if(!playing){
     clearInterval(time);
     clearInterval(foodTime);
+    pauseFoodTimer()
     document.getElementById("start").textContent = "Start (space)";
   }
 }
@@ -231,8 +258,9 @@ function updateScore(x){
 }
 
 function reset(){
-  updateScore(score)
+  if(playing == true) updateScore(score)
   levelCheck()
+  resetFoodTimer()
   snake.reset();
   score = 0;
   playing = true;
@@ -241,8 +269,10 @@ function reset(){
   blockList = [];
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   snake.draw();
-  for (i = 0; i < 10; i++){
-    addBlock()
+  if (enableBlocks == true){
+    for (i = 0; i < 10; i++){
+      addBlock()
+    }
   }
 }
 
@@ -268,10 +298,12 @@ function addFood(){
       if(blockList[i].x == x && blockList[i].y == y){
         foodPlace = false;
         foodList = [];
-        addFood()
+        addFood();
       }
     }
-    if (foodPlace) foodList.push({x,y}) 
+    if (foodPlace) foodList.push({x,y})
+    resetFoodTimer();
+    if(foodTimerEnabled == true) startFoodTimer();
   }
 }
 function food(){
@@ -280,23 +312,51 @@ function food(){
     ctx.fillRect(foodList[i].x, foodList[i].y, boxSize, boxSize);
   }
 }
+function startFoodTimer(){
+foodTimerInterval = setInterval(()=>{
+    displayedFoodCount -= 1;
+    foodTimerDisplay.innerText = displayedFoodCount;
+    foodTimerBar.style.width = (displayedFoodCount * 10) + "%";
+    if(displayedFoodCount == 0){
+      if(snake.body.length != 1) snake.body.pop();
+      if (score != 0) score -= 1;
+      foodList.pop()
+      resetFoodTimer()
+    }
+  }, 1000)
+}
+function resetFoodTimer(){
+  if(typeof foodTimerInterval !== "undefined"){
+    clearInterval(foodTimerInterval);
+    displayedFoodCount = 10;
+    foodTimerBar.style.width = (displayedFoodCount * 10) + "%";
+    foodTimerDisplay.innerText = displayedFoodCount;
+  }
+}
+function pauseFoodTimer(){
+  if(typeof foodTimerInterval !== "undefined"){
+    clearInterval(foodTimerInterval);
+    foodTimerDisplay.innerText = displayedFoodCount;
+  }
+}
+
 
 let blockList = [];
+let blockMoveCounter = 0;
+const blockMoveInterval = 1; // move every x updateCanvas() calls
 function addBlock(){
-  if (enableBlocks == true){
-    if (blockList.length < 10){
-      let x = Math.floor(Math.random() * (gridSize)) * boxSize;
-      let y = Math.floor(Math.random() * (gridSize)) * boxSize;
-      let blockPlace = true;
-      for (let i = 0; i < snake.body.length; i++){
-        if (x == snake.body[i].x && y == snake.body[i].y){
-          for (let i = 0; i < blockList.length; i++){
-            if (x == blockList[i].x && y == blockList[i].y) blockPlace = false;
-          }
+  if (blockList.length < 10){
+    let x = Math.floor(Math.random() * (gridSize)) * boxSize;
+    let y = Math.floor(Math.random() * (gridSize)) * boxSize;
+    let blockPlace = true;
+    for (let i = 0; i < snake.body.length; i++){
+      if (x == snake.body[i].x && y == snake.body[i].y){
+        for (let i = 0; i < blockList.length; i++){
+          if (x == blockList[i].x && y == blockList[i].y) blockPlace = false;
         }
       }
-      if (blockList)blockList.push({x,y})
     }
+    if (blockList)blockList.push({x,y})
   }
   else return;
 }
@@ -309,7 +369,6 @@ function block(){
   }
   else return;
 }
-
 function seeking(startX, startY, targetX, targetY){
   let queue = [[startX, startY]];
   let visited = new Set();
@@ -345,10 +404,6 @@ function seeking(startX, startY, targetX, targetY){
     }
   }
 }
-
-let blockMoveCounter = 0;
-const blockMoveInterval = 1; // move every x updateCanvas() calls
-
 function moveBlocksTowardSnake(){
   blockMoveCounter++;
   if (blockMoveCounter < blockMoveInterval) return;
@@ -402,4 +457,4 @@ function moveBlocksTowardSnake(){
   }
 }
 
-levelCheck()
+// levelCheck()

@@ -29,11 +29,11 @@
           <li>5. <span id="score5" class="scoreCount">#</span></li>
         </ul>
       </div>
-			<div class="food-timer-container">
+			<div id="foodTimerContainer">
 				<h3>Food timer:</h3>
 				<span id="foodTimerDisplay">10</span>
-				<div id="foodTimerBarContainer" style="width: 100%; background: #ddd; border-radius: 8px; overflow: hidden; height: 10px;">
-					<div id="foodTimerBar" style="width: 100%; background: tomato; height: 100%; transition: width 0.1s linear;"></div>
+				<div class="food-timer-bar-container">
+					<div id="foodTimerBar"></div>
 				</div>
 			</div>
 		</section>
@@ -62,6 +62,7 @@
 						</li>
 					</ul>
 				</li>
+
 				<li>
 					<ul class="sub-list">
 						<li>Map</li>
@@ -75,6 +76,7 @@
 						</li>
 					</ul>
 				</li>
+
 				<li>
 					<ul class="sub-list">
 						<li>Borders</li>
@@ -88,6 +90,7 @@
 						</li>
 					</ul>
 				</li>
+
 				<li>
 					<ul class="sub-list">
 						<li>Blocks</li>
@@ -104,7 +107,21 @@
 							<label for="movingBlocks">Blocks 😈</label>
 						</li>
 					</ul>
-				</li>				
+				</li>
+
+				<li>
+					<ul class="sub-list">
+						<li>Food timer</li>
+						<li>
+							<input type="radio" name="foodTimer" id="foodTimerDisable" value="foodTimerDisable" checked>
+							<label for="foodTimerDisable">Disable food timer 🥱</label>
+						</li>
+						<li>
+							<input type="radio" name="foodTimer" id="foodTimerEnable" value="foodTimerEnable">
+							<label for="foodTimerEnable">Enable food timer 🫨</label>
+						</li>
+					</ul>
+				</li>		
 			</ul>
 		</section>
 	</main>

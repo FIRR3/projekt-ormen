@@ -41,6 +41,22 @@ header{
 .game-section{
   background-color: blanchedalmond;
 }
+#foodTimerContainer{
+  display: none;
+}
+.food-timer-bar-container{
+  width: 100%;
+  background: #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 10px;
+}
+#foodTimerBar{
+  width: 100%;
+  background: tomato;
+  height: 100%;
+  transition: width 0.1s linear;
+}
 
 .level-section{
   background-color: blueviolet;
