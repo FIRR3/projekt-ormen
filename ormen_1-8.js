@@ -8,7 +8,9 @@ reset_game.addEventListener("click", reset);
 const foodTimerDisplay = document.getElementById("foodTimerDisplay");
 const foodTimerBar = document.getElementById("foodTimerBar");
 const foodTimerContainer = document.getElementById("foodTimerContainer");
-let displayedFoodCount = 10;
+
+let timeVariance = 10; //hanterar foodTimern
+let displayedFoodCount = timeVariance; //hanterar foodTimern
 let foodTimerEnabled;
 
 //canvas
@@ -25,6 +27,8 @@ let enableBlocks = false; //används för om vi ska spawna blocks eller inte
 let movingBlocks = document.getElementById("movingBlocks");
 //variabel för att det ska finnas borders eller inte
 let enableBorders = true;
+//variabel för enemy snake
+let enableEnemySnake = false;
 //variabel för om spelet körs 
 let playing = false;
 
@@ -36,11 +40,25 @@ let gridSize = canvas.width / boxSize;
 
 
 class Snake{
-  constructor(){
-    this.body = [{x: 10, y: 10},{x: 9, y: 10},{x: 8, y: 10}];
-    this.direction ={x: 1, y: 0};
+  constructor(startX, startY, color) {
+    this.body = [
+      { x: startX, y: startY },
+      { x: startX - boxSize, y: startY },
+      { x: startX - 2 * boxSize, y: startY }
+    ];
+    this.direction = { x: 0, y: 0 };
+    this.color = color; // Store the snake's color
   }
   
+  reset() {
+    this.body = [
+      { x: this.initX, y: this.initY },
+      { x: this.initX - 1, y: this.initY },
+      { x: this.initX - 2, y: this.initY }
+    ];
+    this.direction = { x: 1, y: 0 };
+  }
+
   move(){
     const head = {
       x: this.body[0].x + this.direction.x,
@@ -61,8 +79,8 @@ class Snake{
       }
     }
     
-    for (let i = 1; i < snake.body.length; i++){
-      if (head.x === snake.body[i].x && head.y === snake.body[i].y){
+    for (let i = 1; i < playerSnake.body.length; i++){
+      if (head.x === playerSnake.body[i].x && head.y === playerSnake.body[i].y){
         reset()
       }
     }
@@ -73,16 +91,11 @@ class Snake{
     }
   }
 
-  draw(){
-    ctx.fillStyle = "lightgreen";
-    this.body.forEach(segment =>{
-      ctx.fillRect(
-        segment.x * boxSize,
-        segment.y * boxSize,
-        boxSize,
-        boxSize
-      );
-    });
+  draw(ctx) {
+    ctx.fillStyle = this.color;
+    for (let segment of this.body) {
+      ctx.fillRect(segment.x * boxSize, segment.y * boxSize, boxSize, boxSize);
+    }
   }
 
   changeDirection(newDirection){
@@ -116,33 +129,34 @@ class Snake{
   }
 }
 
-const snake = new Snake();
 
+const enemySnake = new Snake(50, 50, "red"); // or whatever starting point you want
+const playerSnake = new Snake(10, 10, "lightgreen");
 //hanterar olika key inputs
 function inputHandler(event){
   switch(event.key){
     case "ArrowUp":
     case "w":
     case "W":
-      snake.changeDirection({x: 0, y: -1});
+      playerSnake.changeDirection({x: 0, y: -1});
       event.preventDefault()
       break;
     case "ArrowDown":
     case "s":
     case "S":
-      snake.changeDirection({x: 0, y: 1});
+      playerSnake.changeDirection({x: 0, y: 1});
       event.preventDefault()
       break;
     case "ArrowLeft":
     case "a":
     case "A":
-      snake.changeDirection({x: -1, y: 0});
+      playerSnake.changeDirection({x: -1, y: 0});
       event.preventDefault()
       break;
     case "ArrowRight":
     case "d":
     case "D":
-      snake.changeDirection({x: 1, y: 0});
+      playerSnake.changeDirection({x: 1, y: 0});
       event.preventDefault()
       break;
     case " ":
@@ -162,6 +176,7 @@ function levelCheck(){
   var checked_borders = document.querySelector('input[name = "borders"]:checked')
   var checked_blocks = document.querySelector('input[name = "blocks"]:checked')
   var checked_foodTimer = document.querySelector('input[name = "foodTimer"]:checked')	
+  var checked_enemySnake = document.querySelector('input[name = "enemySnake"]:checked')	
 
   //slow, medium & fast speed
   if(checked_speed.value == "slow") speed = 200;
@@ -190,7 +205,7 @@ function levelCheck(){
 
   //blocks
   if(checked_blocks.value == "noBlocks") enableBlocks = false;
-  else if(checked_blocks.value == "haveBlocks" || "movingBlocks") enableBlocks = true;
+  else if(checked_blocks.value == "haveBlocks" || checked_blocks.value == "movingBlocks") enableBlocks = true;
 
   //food timer
   if(checked_foodTimer.value == "foodTimerDisable"){
@@ -200,7 +215,11 @@ function levelCheck(){
   if(checked_foodTimer.value == "foodTimerEnable"){
     foodTimerEnabled = true;
     foodTimerContainer.style.display = "block";
+    foodTimerBar.style.width = "100%";
   }
+
+  //enemy snake
+  if(checked_enemySnake.value == "enemySnakeDisable") 
 
   clearInterval(time)
   time = setInterval(reset, speed);
@@ -215,14 +234,18 @@ check = function(){
 
 function updateCanvas(){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  snake.move();
-  snake.draw();
-  snake.eat();
-  food()
+  playerSnake.move();
+  enemyMove();
+  playerSnake.draw(ctx);
+  enemySnake.draw(ctx);
+  playerSnake.eat();
+  enemyEat();
+  food();
   if (movingBlocks.checked) {
     moveBlocksTowardSnake();
   }
-  block()
+  block();
+  detectCollisionWithEnemy();
   document.getElementById("scoreCounter").innerText = score;
 }
 
@@ -257,21 +280,27 @@ function updateScore(x){
   }
 }
 
-function reset(){
-  if(playing == true) updateScore(score)
-  levelCheck()
-  resetFoodTimer()
-  snake.reset();
+function reset() {
+  if (playing == true) updateScore(score);
+  levelCheck();
+  resetFoodTimer();
+
+  playerSnake.reset();
+  enemySnake.reset(); // Ensure enemy resets too
+
   score = 0;
   playing = true;
-  timer()
+  timer();
   foodList = [];
   blockList = [];
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  snake.draw();
-  if (enableBlocks == true){
-    for (i = 0; i < 10; i++){
-      addBlock()
+
+  playerSnake.draw(ctx);
+  enemySnake.draw(ctx); // Draw both snakes on reset
+
+  if (enableBlocks == true) {
+    for (let i = 0; i < 10; i++) {
+      addBlock();
     }
   }
 }
@@ -284,8 +313,8 @@ function addFood(){
     let y = Math.floor(Math.random() * (gridSize)) * boxSize;
     let foodPlace = true;
     //om maten rör ormen kommer maten att käkas upp
-    for (let i = 0; i < snake.body.length; i++){
-      if (x == snake.body[i].x && y == snake.body[i].y){
+    for (let i = 0; i < playerSnake.body.length; i++){
+      if (x == playerSnake.body[i].x && y == playerSnake.body[i].y){
         for (let i = 0; i < foodList.length; i++){
           if (x == foodList[i].x && y == foodList[i].y){
             foodPlace = false;
@@ -301,9 +330,15 @@ function addFood(){
         addFood();
       }
     }
-    if (foodPlace) foodList.push({x,y})
-    resetFoodTimer();
-    if(foodTimerEnabled == true) startFoodTimer();
+    if (foodPlace) foodList.push({x,y});
+    if(foodTimerEnabled == true){
+      foodTimerVariance();
+      resetFoodTimer();
+    }
+    if(foodTimerEnabled == true){
+      foodTimerVariance() 
+      startFoodTimer();
+    }
   }
 }
 function food(){
@@ -312,13 +347,31 @@ function food(){
     ctx.fillRect(foodList[i].x, foodList[i].y, boxSize, boxSize);
   }
 }
+//kontrollerar hur mycket tid timern kommer att ha beroende på ormens position
+function foodTimerVariance(){
+  const foodTimerDefaultTime = 3; //default time som food timern kommer att ha, bortsett från timevariance
+  let foodDistanceX = playerSnake.body[0].x + playerSnake.body[0].y;
+  let foodDistanceY = foodList[i].x/boxSize + foodList[i].y/boxSize;
+  //let timeVariance;
+
+  //räknar ut foodDistance x (hur många x från ormens huvud till maten)
+  (playerSnake.body[0].x >= (foodList[i].x/boxSize)) ? foodDistanceX = playerSnake.body[0].x - (foodList[i].x/boxSize) : foodDistanceX = (foodList[i].x/boxSize) - playerSnake.body[0].x;
+
+  //räknar ut foodDistance x (hur många x från ormens huvud till maten)
+  (playerSnake.body[0].y >= (foodList[i].y/boxSize)) ? foodDistanceY = playerSnake.body[0].y - (foodList[i].y/boxSize) : foodDistanceY = (foodList[i].y/boxSize) - playerSnake.body[0].y;
+
+  (foodDistanceX >= foodDistanceY) ? timeVariance = foodTimerDefaultTime + (foodDistanceX - foodDistanceY) : timeVariance = foodTimerDefaultTime + (foodDistanceY - foodDistanceX)  
+
+  console.log(foodDistanceX, foodDistanceY);
+  console.log("variance: " + timeVariance)
+}
 function startFoodTimer(){
-foodTimerInterval = setInterval(()=>{
+  foodTimerInterval = setInterval(()=>{
     displayedFoodCount -= 1;
     foodTimerDisplay.innerText = displayedFoodCount;
-    foodTimerBar.style.width = (displayedFoodCount * 10) + "%";
+    foodTimerBar.style.width = (100 * ((1/timeVariance)*displayedFoodCount)) + "%"; //formel för att barens width ska ändras proportionellt
     if(displayedFoodCount == 0){
-      if(snake.body.length != 1) snake.body.pop();
+      if(playerSnake.body.length != 1) playerSnake.body.pop();
       if (score != 0) score -= 1;
       foodList.pop()
       resetFoodTimer()
@@ -328,8 +381,8 @@ foodTimerInterval = setInterval(()=>{
 function resetFoodTimer(){
   if(typeof foodTimerInterval !== "undefined"){
     clearInterval(foodTimerInterval);
-    displayedFoodCount = 10;
-    foodTimerBar.style.width = (displayedFoodCount * 10) + "%";
+    displayedFoodCount = timeVariance;
+    foodTimerBar.style.width = "100%";
     foodTimerDisplay.innerText = displayedFoodCount;
   }
 }
@@ -349,8 +402,8 @@ function addBlock(){
     let x = Math.floor(Math.random() * (gridSize)) * boxSize;
     let y = Math.floor(Math.random() * (gridSize)) * boxSize;
     let blockPlace = true;
-    for (let i = 0; i < snake.body.length; i++){
-      if (x == snake.body[i].x && y == snake.body[i].y){
+    for (let i = 0; i < playerSnake.body.length; i++){
+      if (x == playerSnake.body[i].x && y == playerSnake.body[i].y){
         for (let i = 0; i < blockList.length; i++){
           if (x == blockList[i].x && y == blockList[i].y) blockPlace = false;
         }
@@ -409,9 +462,9 @@ function moveBlocksTowardSnake(){
   if (blockMoveCounter < blockMoveInterval) return;
   blockMoveCounter = 0;
 
-  const head = snake.body[0];
+  const head = playerSnake.body[0];
 
-  for (let block of blockList) {
+  for (let block of blockList){
     // Initialize individual cooldown if it doesn't exist
     if (block.moveCooldown === undefined) {
       block.moveCooldown = Math.floor(Math.random() * 5) + 3;
@@ -438,7 +491,7 @@ function moveBlocksTowardSnake(){
     }
 
     // Check collision with snake's body
-    let collisionWithSnake = snake.body.some(segment => {
+    let collisionWithSnake = playerSnake.body.some(segment => {
       return nextX === segment.x * boxSize && nextY === segment.y * boxSize;
     });
 
@@ -457,4 +510,74 @@ function moveBlocksTowardSnake(){
   }
 }
 
-// levelCheck()
+//enemy snake
+enemySnake.body = [{x: 5, y: 5}, {x: 4, y: 5}, {x: 3, y: 5}];
+enemySnake.direction = {x: 1, y: 0};
+
+function enemyMove() {
+  if (foodList.length === 0) return;
+
+  const food = foodList[0];
+  const head = enemySnake.body[0];
+
+  let dx = food.x / boxSize - head.x;
+  let dy = food.y / boxSize - head.y;
+
+  let options = [];
+  if (dx !== 0) options.push({ x: Math.sign(dx), y: 0 });
+  if (dy !== 0) options.push({ x: 0, y: Math.sign(dy) });
+
+  // Add some randomness
+  if (Math.random() < 0.2 || options.length === 0) {
+    const dirs = [
+      { x: 0, y: -1 },
+      { x: 0, y: 1 },
+      { x: -1, y: 0 },
+      { x: 1, y: 0 }
+    ];
+    options = dirs.sort(() => 0.5 - Math.random());
+  }
+
+  // Filter out dangerous directions
+  const safeOptions = options.filter(dir => {
+    const nextX = head.x + dir.x;
+    const nextY = head.y + dir.y;
+
+    const inBounds = enableBorders
+      ? (nextX >= 0 && nextX < gridSize && nextY >= 0 && nextY < gridSize)
+      : true;
+
+    const collidesWithSelf = enemySnake.body.some(p => p.x === nextX && p.y === nextY);
+    const collidesWithPlayer = playerSnake.body.some(p => p.x === nextX && p.y === nextY);
+    const collidesWithBlock = enableBlocks &&
+      blockList.some(b => b.x / boxSize === nextX && b.y / boxSize === nextY);
+
+    return inBounds && !collidesWithSelf && !collidesWithPlayer && !collidesWithBlock;
+  });
+
+  if (safeOptions.length > 0) {
+    enemySnake.changeDirection(safeOptions[0]);
+    enemySnake.move();
+  }
+}
+function enemyEat(){
+  if (foodList.length < 1) return;
+
+  const head = enemySnake.body[0];
+  const food = foodList[0];
+
+  if (head.x === food.x / boxSize && head.y === food.y / boxSize){
+    enemySnake.body.push({...enemySnake.body[enemySnake.body.length - 1]});
+    foodList.pop();
+    resetFoodTimer();
+    if (foodTimerEnabled) startFoodTimer();
+  }
+}
+function detectCollisionWithEnemy(){
+  const head = playerSnake.body[0];
+  for (let i = 0; i < enemySnake.body.length; i++){
+    if (head.x === enemySnake.body[i].x && head.y === enemySnake.body[i].y){
+      reset(); // Game over
+    }
+  }
+}
