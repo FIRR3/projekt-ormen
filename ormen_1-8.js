@@ -334,9 +334,6 @@ function addFood(){
     if(foodTimerEnabled == true){
       foodTimerVariance();
       resetFoodTimer();
-    }
-    if(foodTimerEnabled == true){
-      foodTimerVariance() 
       startFoodTimer();
     }
   }
@@ -349,18 +346,21 @@ function food(){
 }
 //kontrollerar hur mycket tid timern kommer att ha beroende på ormens position
 function foodTimerVariance(){
-  const foodTimerDefaultTime = 3; //default time som food timern kommer att ha, bortsett från timevariance
-  let foodDistanceX = playerSnake.body[0].x + playerSnake.body[0].y;
-  let foodDistanceY = foodList[i].x/boxSize + foodList[i].y/boxSize;
-  //let timeVariance;
+  const foodTimerMinimumTime = 3; //minimum time som food timern kommer att ha
+  let foodDistanceX;
+  let foodDistanceY;
 
-  //räknar ut foodDistance x (hur många x från ormens huvud till maten)
-  (playerSnake.body[0].x >= (foodList[i].x/boxSize)) ? foodDistanceX = playerSnake.body[0].x - (foodList[i].x/boxSize) : foodDistanceX = (foodList[i].x/boxSize) - playerSnake.body[0].x;
+  for(i = 0; i < foodList.length; i++){
+    //räknar ut foodDistance x, hur många x från ormens huvud till maten
+    (playerSnake.body[0].x >= (foodList[i].x/boxSize)) ? foodDistanceX = playerSnake.body[0].x - (foodList[i].x/boxSize) : foodDistanceX = (foodList[i].x/boxSize) - playerSnake.body[0].x;
 
-  //räknar ut foodDistance x (hur många x från ormens huvud till maten)
-  (playerSnake.body[0].y >= (foodList[i].y/boxSize)) ? foodDistanceY = playerSnake.body[0].y - (foodList[i].y/boxSize) : foodDistanceY = (foodList[i].y/boxSize) - playerSnake.body[0].y;
+    //räknar ut foodDistance y, hur många y från ormens huvud till maten
+    (playerSnake.body[0].y >= (foodList[i].y/boxSize)) ? foodDistanceY = playerSnake.body[0].y - (foodList[i].y/boxSize) : foodDistanceY = (foodList[i].y/boxSize) - playerSnake.body[0].y;
+  }
 
-  (foodDistanceX >= foodDistanceY) ? timeVariance = foodTimerDefaultTime + (foodDistanceX - foodDistanceY) : timeVariance = foodTimerDefaultTime + (foodDistanceY - foodDistanceX)  
+
+  (Math.round((foodDistanceX + foodDistanceY)/2) > foodTimerMinimumTime)? timeVariance = Math.round((foodDistanceX + foodDistanceY)/2) : timeVariance = 3;
+
 
   console.log(foodDistanceX, foodDistanceY);
   console.log("variance: " + timeVariance)
@@ -581,3 +581,4 @@ function detectCollisionWithEnemy(){
     }
   }
 }
+levelCheck();
