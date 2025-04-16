@@ -38,6 +38,10 @@ let score = 0;
 let boxSize = 25;
 let gridSize = canvas.width / boxSize;
 
+const playerSnakeX = 10;
+const playerSnakeY = playerSnakeX;
+const enemySnakeX = 50; 
+const enemySnakeY = enemySnakeX;
 
 class Snake{
   constructor(startX, startY, color) {
@@ -48,15 +52,6 @@ class Snake{
     ];
     this.direction = { x: 0, y: 0 };
     this.color = color; // Store the snake's color
-  }
-  
-  reset() {
-    this.body = [
-      { x: this.initX, y: this.initY },
-      { x: this.initX - 1, y: this.initY },
-      { x: this.initX - 2, y: this.initY }
-    ];
-    this.direction = { x: 1, y: 0 };
   }
 
   move(){
@@ -130,8 +125,10 @@ class Snake{
 }
 
 
-const enemySnake = new Snake(50, 50, "red"); // or whatever starting point you want
+
 const playerSnake = new Snake(10, 10, "lightgreen");
+
+let enemySnake;
 //hanterar olika key inputs
 function inputHandler(event){
   switch(event.key){
@@ -173,10 +170,10 @@ function inputHandler(event){
 function levelCheck(){
   var checked_speed = document.querySelector('input[name = "speed"]:checked');
   var checked_map = document.querySelector('input[name = "map"]:checked');
-  var checked_borders = document.querySelector('input[name = "borders"]:checked')
-  var checked_blocks = document.querySelector('input[name = "blocks"]:checked')
-  var checked_foodTimer = document.querySelector('input[name = "foodTimer"]:checked')	
-  var checked_enemySnake = document.querySelector('input[name = "enemySnake"]:checked')	
+  var checked_borders = document.querySelector('input[name = "borders"]:checked');
+  var checked_blocks = document.querySelector('input[name = "blocks"]:checked');
+  var checked_foodTimer = document.querySelector('input[name = "foodTimer"]:checked');
+  var checked_enemySnake = document.querySelector('input[name = "enemySnake"]:checked');
 
   //slow, medium & fast speed
   if(checked_speed.value == "slow") speed = 200;
@@ -219,7 +216,14 @@ function levelCheck(){
   }
 
   //enemy snake
-  if(checked_enemySnake.value == "enemySnakeDisable") 
+  if(checked_enemySnake.value == "enemySnakeDisable"){
+    enableEnemySnake = false;
+    enemySnake = new Snake(10, 10, "transparent")
+  }
+  else if(checked_enemySnake.value == "enemySnakeEnable"){
+    enableEnemySnake = true;
+    enemySnake = new Snake(10, 10, "tomato")
+  }
 
   clearInterval(time)
   time = setInterval(reset, speed);
@@ -236,8 +240,9 @@ function updateCanvas(){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   playerSnake.move();
   enemyMove();
-  playerSnake.draw(ctx);
+
   enemySnake.draw(ctx);
+  playerSnake.draw(ctx);
   playerSnake.eat();
   enemyEat();
   food();
@@ -295,8 +300,8 @@ function reset() {
   blockList = [];
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  playerSnake.draw(ctx);
   enemySnake.draw(ctx); // Draw both snakes on reset
+  playerSnake.draw(ctx);
 
   if (enableBlocks == true) {
     for (let i = 0; i < 10; i++) {
@@ -358,9 +363,7 @@ function foodTimerVariance(){
     (playerSnake.body[0].y >= (foodList[i].y/boxSize)) ? foodDistanceY = playerSnake.body[0].y - (foodList[i].y/boxSize) : foodDistanceY = (foodList[i].y/boxSize) - playerSnake.body[0].y;
   }
 
-
-  (Math.round((foodDistanceX + foodDistanceY)/2) > foodTimerMinimumTime)? timeVariance = Math.round((foodDistanceX + foodDistanceY)/2) : timeVariance = 3;
-
+  (Math.round((foodDistanceX + foodDistanceY)/2) > foodTimerMinimumTime)? timeVariance = Math.round((foodDistanceX + foodDistanceY)/2) : timeVariance = foodTimerMinimumTime;
 
   console.log(foodDistanceX, foodDistanceY);
   console.log("variance: " + timeVariance)
@@ -511,10 +514,8 @@ function moveBlocksTowardSnake(){
 }
 
 //enemy snake
-enemySnake.body = [{x: 5, y: 5}, {x: 4, y: 5}, {x: 3, y: 5}];
-enemySnake.direction = {x: 1, y: 0};
-
 function enemyMove() {
+  if(enableEnemySnake == false) return;
   if (foodList.length === 0) return;
 
   const food = foodList[0];
@@ -561,6 +562,7 @@ function enemyMove() {
   }
 }
 function enemyEat(){
+  if(enableEnemySnake == false) return;
   if (foodList.length < 1) return;
 
   const head = enemySnake.body[0];
@@ -574,6 +576,7 @@ function enemyEat(){
   }
 }
 function detectCollisionWithEnemy(){
+  if(enableEnemySnake == false) return;
   const head = playerSnake.body[0];
   for (let i = 0; i < enemySnake.body.length; i++){
     if (head.x === enemySnake.body[i].x && head.y === enemySnake.body[i].y){
