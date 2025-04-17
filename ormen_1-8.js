@@ -193,11 +193,11 @@ function levelCheck(){
   //borders
   if(checked_borders.value == "noBorderPassThrough"){
     enableBorders = true;
-    canvas.style.border = "3px solid blue"
+    canvas.style.border = "3px solid white"
   }
   else if(checked_borders.value == "borderPassThrough"){
     enableBorders = false;
-    canvas.style.border = "3px solid chocolate"
+    canvas.style.border = "3px solid antiquewhite"
   }
 
   //blocks
@@ -419,7 +419,7 @@ function addBlock(){
 function block(){
   if (enableBlocks == true){
     for (let i = 0; i < blockList.length; i++){
-      ctx.fillStyle = "blue";
+      ctx.fillStyle = "white";
       ctx.fillRect(blockList[i].x, blockList[i].y, boxSize, boxSize);
     }
   }
