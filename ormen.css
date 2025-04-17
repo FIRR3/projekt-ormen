@@ -4,17 +4,20 @@
 p, .btn{
   font-size: medium;
 }
-
+body{
+  background-color: antiquewhite;
+}
 main{
+  padding: 3vw;
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  background-color: chocolate;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-column-gap: 4vw;
+  grid-row-gap: 1vw;
 }
 
 header{
   grid-column: 1/4;
   text-align: center;
-  background-color: cyan;
 }
 
 .canvas-container{
@@ -22,24 +25,23 @@ header{
   justify-content: center;
 }
 #canvas{
-  width: 80%;
+  width: 500px;
+  height: 500px;
   object-fit: contain;
-  background-color: black;
-  border: 3px solid blue;
+  background-color: rgb(47, 109, 202);
 }
 
-.game-section, .level-section{
+.game-section, .level-section{ 
   display: flex;
   flex-direction: column;
   padding: 0 min(40px, 5vw);
   text-align: start;
+  background-color: rgb(239, 128, 100);
+  border-radius: 2vw;
 }
 
 .game-section h2, .level-section h2{
   text-align: center;
-}
-.game-section{
-  background-color: blanchedalmond;
 }
 #foodTimerContainer{
   display: none;
@@ -53,17 +55,16 @@ header{
 }
 #foodTimerBar{
   width: 100%;
-  background: tomato;
+  background: red;
   height: 100%;
   transition: width 0.1s linear;
-}
-
-.level-section{
-  background-color: blueviolet;
 }
 .level-list{
   padding: 0;
   list-style-type: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-row-gap: 0.5vw;
 }
 
 .btn{

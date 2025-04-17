@@ -12,7 +12,7 @@ let playing = false;
 let speed = 100;
 let scoreCounter = 0;
 
-let boxSize = 10;
+let boxSize = 25;
 let gridSize = canvas.width / boxSize;
 
 //responsiv canvas
@@ -134,7 +134,6 @@ function inputHandler(event){
   }
 }
 
-
   //checkar levels och uppdateras varje gång en input clickas
   function levelCheck(){
     var checked_speed = document.querySelector('input[name = "speed"]:checked');
@@ -244,7 +243,7 @@ function addBlock(){
 }
 function block(){
   for (let i = 0; i < block_list.length; i++){
-    ctx.fillStyle = "blue";
+    ctx.fillStyle = "white";
     ctx.fillRect(block_list[i].x, block_list[i].y, boxSize, boxSize);
   }
 }
