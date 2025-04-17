@@ -222,7 +222,7 @@ function levelCheck(){
   }
   else if(checked_enemySnake.value == "enemySnakeEnable"){
     enableEnemySnake = true;
-    enemySnake = new Snake(10, 10, "tomato")
+    enemySnake = new Snake(10, 10, "red")
   }
 
   clearInterval(time)
